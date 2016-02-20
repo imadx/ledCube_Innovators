@@ -28,7 +28,8 @@ var sendRequest = function(){
 	if(!isNaN(value) == true){
 		$("#signInBtn").html('<i class="material-icons">send</i> Sending... ');
 
-		var url = "http://localhost:3000/request/pattern";
+		// var url = "http://localhost:3000/request/pattern";
+		var url = "https://hackersclub.herokuapp.com/request/pattern";
 
 		$.ajax({
 		  method: "POST",
