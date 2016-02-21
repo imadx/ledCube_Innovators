@@ -10,6 +10,10 @@ router.get('/simulator', function(req, res, next) {
 	console.log(req.query);
   	res.render('simulator');
 });
+router.get('/submit', function(req, res, next) {
+	console.log(req.query);
+  	res.render('submit');
+});
 
 router.get('/patternRequest', function(req, res, next) {
 	console.log(req.query);
