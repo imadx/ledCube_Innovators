@@ -161,7 +161,7 @@ var prepareJSONdata = function(json){
 }
 
 var prepareJSONForNextIteration = function(){
-	current_jsonPattern = Object.values(jsonFile.pattern)[current_jsonPattern_id++]
+	current_jsonPattern = Object.values(jsonFile.pattern)[current_jsonPattern_id++];
 	if(current_jsonPattern_id >= jsonFile.length){
 		current_jsonPattern_id = 0;
 	}
