@@ -85,31 +85,82 @@
 
 		var display_queue = [];
 
-
-		socket.on('request_pattern', function(data){
-			if(display_queue.length > 10) return;
-			nextPattern = data.id;
-			if(nextPattern == currentPattern){
-				return;
-			}
-
-			currentPattern = nextPattern;
-			display_queue.push(nextPattern);
-			$("#display_queue_content").fadeIn();
-			$("#display_queue_content .text").text(JSON.stringify(display_queue));
+		var globalData;
+		socket.on('request_scoreboard', function(data){
+			globalData = data;
 			console.log(data);
-			if(display_timerCount < 10) {
-				return;
+
+			$("#team_score_A").text(data["scores[" + teamA + "]"]);
+			$("#team_score_B").text(data["scores[" + teamB + "]"]);
+
+			$(".patternGroup a").removeClass("btn-success").addClass("btn-info");
+
+			var starsA = data["bits[" + teamA + "][]"];
+			for (star in starsA) {
+			  var starId = (starsA[star]);
+			  $("#pattern_" + starId + "_A a").addClass('btn-success');
+			  $("#pattern_" + starId + "_A a").removeClass('btn-info');
 			}
-			if($.inArray(nextPattern, [1,2,3,4,5,6,7,8,9,10])){
-				display_startTimer();
-				setTimeout(function(){
-					setPattern(data.id);
-					display_endTimer();
-				}, 10000);
+
+			var starsB = data["bits[" + teamB + "][]"];
+			for (star in starsB) {
+			  var starId = (starsB[star]);
+			  $("#pattern_" + starId + "_B a").addClass('btn-success');
+			  $("#pattern_" + starId + "_B a").removeClass('btn-info');
 			}
+			
 		});
 
+		var teamA = "A";
+		var teamB = "B";
+		socket.on('request_setTeams', function(data){
+			var teams = data;
+			console.log(data);
+			teamA = teams["dataTeams[teamA]"];
+			teamB = teams["dataTeams[teamB]"];
+			console.log(teamA);
+			console.log(teamB);
+
+
+			$("#display_teamName_A").text("Group " + getTeamName(teamA));
+			$("#display_teamName_B").text("Group " + getTeamName(teamB));
+
+			refreshData();
+		});
+
+		function getTeamName(team){
+			if(team == "A") return "Optimus";
+			if(team == "B") return "Candles";
+			if(team == "C") return "Dell 10";
+			if(team == "D") return "Cube flanger";
+			if(team == "E") return "Knight Riders";
+			if(team == "F") return "Kicking Sparking";
+			if(team == "G") return "Game Blasters";
+			if(team == "H") return "Fireflies";
+			if(team == "I") return "Light Zooners";
+		}
+
+		function refreshData(){
+			console.log(teamA + ":" + teamB);
+			$("#team_score_A").text(globalData["scores[" + teamA + "]"]);
+			$("#team_score_B").text(globalData["scores[" + teamB + "]"]);
+
+			$(".patternGroup a").removeClass("btn-success").addClass("btn-info");
+
+			var starsA = globalData["bits[" + teamA + "][]"];
+			for (star in starsA) {
+			  var starId = (starsA[star]);
+			  $("#pattern_" + starId + "_A a").addClass('btn-success');
+			  $("#pattern_" + starId + "_A a").removeClass('btn-info');
+			}
+
+			var starsB = globalData["bits[" + teamB + "][]"];
+			for (star in starsB) {
+			  var starId = (starsB[star]);
+			  $("#pattern_" + starId + "_B a").addClass('btn-success');
+			  $("#pattern_" + starId + "_B a").removeClass('btn-info');
+			}
+		}
 
 		function display_startTimer(){
 			clearInterval(display_timerInterval);
@@ -154,7 +205,7 @@
 			<div class="panel panel-default col-md-12 " style="margin-top: 20px; margin-bottom: 0px; background: #20BD39; color: #fff;">
 			  <div class="panel-body text-center">
 					<img  id="display_icon"src="img/game_ledcube.png" alt="">
-					<h1 id="display_teamName" style="font-size: 18pt;">GROUP A</h1>
+					<h1 id="display_teamName_A" style="font-size: 18pt;">GROUP A</h1>
 			  </div>
 			</div>
 			<div class="panel panel-default col-md-12 patternList" style="margin-top: 0px;">
@@ -195,14 +246,10 @@
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 9</span>
 			  	</div>
-			  	<div id="pattern_10_A" class="patternGroup">
-			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
-			  		<span class="patternName">Pattern 10</span>
-			  	</div>
 			  </div>
 			  <div class="panel-footer" style="margin-bottom: -20px;">
 			  	<h3 style="margin: 0;">Score</h3>
-			  	<h1 style="margin: 0;">0000</h1>
+			  	<h1  id="team_score_A" style="margin: 0;">0000</h1>
 			  </div>
 			</div>
 		</div>
@@ -214,55 +261,51 @@
 			<div class="panel panel-default col-md-12 " style="margin-top: 20px; margin-bottom: 0px; background: #20BD39; color: #fff;">
 			  <div class="panel-body text-center">
 					<img  id="display_icon"src="img/game_ledcube.png" alt="">
-					<h1 id="display_teamName" style="font-size: 18pt;">GROUP A</h1>
+					<h1 id="display_teamName_B" style="font-size: 18pt;">GROUP B</h1>
 			  </div>
 			</div>
 			<div class="panel panel-default col-md-12 patternList" style="margin-top: 0px;">
 			  <div class="panel-body">
-			  	<div id="pattern_1_A" class="patternGroup">
+			  	<div id="pattern_1_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 1</span>
 			  	</div>
-			  	<div id="pattern_2_A" class="patternGroup">
+			  	<div id="pattern_2_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 2</span>
 			  	</div>
-			  	<div id="pattern_3_A" class="patternGroup">
+			  	<div id="pattern_3_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 3</span>
 			  	</div>
-			  	<div id="pattern_4_A" class="patternGroup">
+			  	<div id="pattern_4_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 4</span>
 			  	</div>
-			  	<div id="pattern_5_A" class="patternGroup">
+			  	<div id="pattern_5_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 5</span>
 			  	</div>
-			  	<div id="pattern_6_A" class="patternGroup">
+			  	<div id="pattern_6_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 6</span>
 			  	</div>
-			  	<div id="pattern_7_A" class="patternGroup">
+			  	<div id="pattern_7_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 7</span>
 			  	</div>
-			  	<div id="pattern_8_A" class="patternGroup">
+			  	<div id="pattern_8_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 8</span>
 			  	</div>
-			  	<div id="pattern_9_A" class="patternGroup">
+			  	<div id="pattern_9_B" class="patternGroup">
 			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
 			  		<span class="patternName">Pattern 9</span>
-			  	</div>
-			  	<div id="pattern_10_A" class="patternGroup">
-			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
-			  		<span class="patternName">Pattern 10</span>
 			  	</div>
 			  </div>
 			  <div class="panel-footer" style="margin-bottom: -20px;">
 			  	<h3 style="margin: 0;">Score</h3>
-			  	<h1 style="margin: 0;">0000</h1>
+			  	<h1 id="team_score_B" style="margin: 0;">0000</h1>
 			  </div>
 			</div>
 		</div>
