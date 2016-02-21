@@ -16,6 +16,11 @@ router.get('/patternRequest', function(req, res, next) {
   	res.render('patternRequest');
 });
 
+router.get('/scoreboard', function(req, res, next) {
+	console.log(req.query);
+  	res.render('scoreboard');
+});
+
 router.post('/request/pattern', function (req, res, next) {
     io.emit('request_pattern', req.body);
 

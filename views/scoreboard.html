@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>LED cube: Scoreboard | Innovators 2016</title>  
+
+	<!-- Bootstrap -->
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+	<!-- Bootstrap Material Design -->
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-material-design.css">
+	<link rel="stylesheet" type="text/css" href="css/ripples.min.css">
+	<link rel="stylesheet" type="text/css" href="css/snackbar.min.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/material.min.js"></script>
+	<script type="text/javascript" src="js/ripples.min.js"></script>
+	<script type="text/javascript" src="js/snackbar.min.js"></script>
+	<script type="text/javascript" src="js/socket.io.js"></script>
+	<script type="text/javascript" src="js/three.min.js"></script>
+	<style>
+
+		#poweredby{
+			background: url("img/logo.png") no-repeat center;
+			background-size: contain;
+			position: absolute;
+			right: 10px;
+			bottom: 10px;
+			display: block;
+			width: 100%;
+			height: 80px;
+			/*pointer-events: none;*/
+		}
+		/*Patterns*/
+		.patternList{
+			text-align: center;
+			padding-bottom: 30px;
+		}
+		.patternGroup{
+			text-align: center;
+			display: inline-block;
+			padding: 10px;
+		}
+		.patternGroup .patternName{
+			display: block;
+		}
+
+		#threeJS_Simulator { 
+			/*width: 25%; */
+			/*height: 100%;*/
+			margin-top: 20px;
+			min-height: 400px;
+			position: relative;
+			background: rgba(0,0,0,0.9);
+			/*border-radius: 300px;*/
+		}
+		.blurry{
+			filter: none;
+			transition: filter .3s;
+		}
+		.blurry.active{
+			filter: blur(3px);
+		}
+		table, td, th{
+			font-size: 20pt;
+		}
+	</style>
+	<script>
+
+
+		var nextPattern = 0;
+		var currentPattern = 0;
+		var display_timerInterval;
+		var display_timerCount = 10;
+
+		var socket = io();
+
+		$("#poweredby").ready(function(){
+			$("#display_timer").hide();
+			$("#display_queue_content").hide();
+
+		});
+
+		var display_queue = [];
+
+
+		socket.on('request_pattern', function(data){
+			if(display_queue.length > 10) return;
+			nextPattern = data.id;
+			if(nextPattern == currentPattern){
+				return;
+			}
+
+			currentPattern = nextPattern;
+			display_queue.push(nextPattern);
+			$("#display_queue_content").fadeIn();
+			$("#display_queue_content .text").text(JSON.stringify(display_queue));
+			console.log(data);
+			if(display_timerCount < 10) {
+				return;
+			}
+			if($.inArray(nextPattern, [1,2,3,4,5,6,7,8,9,10])){
+				display_startTimer();
+				setTimeout(function(){
+					setPattern(data.id);
+					display_endTimer();
+				}, 10000);
+			}
+		});
+
+
+		function display_startTimer(){
+			clearInterval(display_timerInterval);
+			display_timerInterval = setInterval(function(){
+
+				$("#display_timer").fadeIn();
+				$("#display_timer").html('<i class="material-icons">timer</i> Changing to Pattern ' + nextPattern + ' in ' + (display_timerCount--) + 's...');
+			}, 1000);
+		}
+
+		function display_endTimer(){
+			clearInterval(display_timerInterval);
+			display_timerCount = 10;
+
+			display_queue.splice(0, 1);
+
+			$("#display_timer").fadeOut();
+			$("#display_queue_content").fadeOut();
+
+			if(display_queue.length > 0){
+				$("#display_queue_content").fadeIn();
+				$("#display_queue_content span.text").text(JSON.stringify(display_queue));
+				nextPattern = display_queue[0];
+				if($.inArray(nextPattern, [1,2,3,4,5,6,7,8,9,10])){
+					display_startTimer();
+					setTimeout(function(){
+						setPattern(nextPattern);
+						display_endTimer();
+					}, 10000);
+				}
+			} else {
+				$("#display_queue_content").fadeOut();
+			}
+		}
+
+	</script>
+</head>
+<body>
+	<div class="blurry">
+		<div id="poweredby" data-toggle="modal" data-target="#totalScores"></div>
+		<div class="col-md-4">
+			<div class="panel panel-default col-md-12 " style="margin-top: 20px; margin-bottom: 0px; background: #20BD39; color: #fff;">
+			  <div class="panel-body text-center">
+					<img  id="display_icon"src="img/game_ledcube.png" alt="">
+					<h1 id="display_teamName" style="font-size: 18pt;">GROUP A</h1>
+			  </div>
+			</div>
+			<div class="panel panel-default col-md-12 patternList" style="margin-top: 0px;">
+			  <div class="panel-body">
+			  	<div id="pattern_1_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 1</span>
+			  	</div>
+			  	<div id="pattern_2_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 2</span>
+			  	</div>
+			  	<div id="pattern_3_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 3</span>
+			  	</div>
+			  	<div id="pattern_4_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 4</span>
+			  	</div>
+			  	<div id="pattern_5_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 5</span>
+			  	</div>
+			  	<div id="pattern_6_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 6</span>
+			  	</div>
+			  	<div id="pattern_7_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 7</span>
+			  	</div>
+			  	<div id="pattern_8_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 8</span>
+			  	</div>
+			  	<div id="pattern_9_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 9</span>
+			  	</div>
+			  	<div id="pattern_10_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 10</span>
+			  	</div>
+			  </div>
+			  <div class="panel-footer" style="margin-bottom: -20px;">
+			  	<h3 style="margin: 0;">Score</h3>
+			  	<h1 style="margin: 0;">0000</h1>
+			  </div>
+			</div>
+		</div>
+		<div class="col-md-4 panel panel-default" id="threeJS_Simulator">
+			<h1 style="color: #fff; text-align: center; margin-bottom: 0px;">Current Pattern</h1>
+			<h1 id="patternId" style="color: #fff; text-align: center; margin-bottom: -50px; margin-top: 0px;">Pattern 1</h1>
+		</div>
+		<div class="col-md-4">
+			<div class="panel panel-default col-md-12 " style="margin-top: 20px; margin-bottom: 0px; background: #20BD39; color: #fff;">
+			  <div class="panel-body text-center">
+					<img  id="display_icon"src="img/game_ledcube.png" alt="">
+					<h1 id="display_teamName" style="font-size: 18pt;">GROUP A</h1>
+			  </div>
+			</div>
+			<div class="panel panel-default col-md-12 patternList" style="margin-top: 0px;">
+			  <div class="panel-body">
+			  	<div id="pattern_1_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 1</span>
+			  	</div>
+			  	<div id="pattern_2_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 2</span>
+			  	</div>
+			  	<div id="pattern_3_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 3</span>
+			  	</div>
+			  	<div id="pattern_4_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 4</span>
+			  	</div>
+			  	<div id="pattern_5_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 5</span>
+			  	</div>
+			  	<div id="pattern_6_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 6</span>
+			  	</div>
+			  	<div id="pattern_7_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 7</span>
+			  	</div>
+			  	<div id="pattern_8_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 8</span>
+			  	</div>
+			  	<div id="pattern_9_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 9</span>
+			  	</div>
+			  	<div id="pattern_10_A" class="patternGroup">
+			  		<a href="javascript:void(0)" class="btn btn-default btn-fab btn-info"><i class="material-icons">grade</i></a>
+			  		<span class="patternName">Pattern 10</span>
+			  	</div>
+			  </div>
+			  <div class="panel-footer" style="margin-bottom: -20px;">
+			  	<h3 style="margin: 0;">Score</h3>
+			  	<h1 style="margin: 0;">0000</h1>
+			  </div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div id="totalScores" class="modal fade" role="dialog">
+	  <div class="modal-dialog" style="width:90%">
+
+	    <!-- Modal content-->
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+	        <h1 class="modal-title">Leaderboard</h1>
+	      </div>
+	      <div class="modal-body">
+	        <table class="table table-striped table-hover " id="display_Leaderboard">
+			  <thead>
+			  <tr>
+			    <th>Team Name</th>
+			    <th>Preliminary Round</th>
+			    <th>1</th>
+			    <th>2</th>
+			    <th>3</th>
+			    <th>1</th>
+			    <th>5</th>
+			    <th>6</th>
+			    <th>7</th>
+			    <th>8</th>
+			    <th>9</th>
+			    <th>10</th>
+			    <th>Final Round</th>
+			  </tr>
+			  </thead>
+			  <tbody>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  	<tr>
+			    <td>Team Name</td>
+			    <td>Preliminary Round</td>
+			    <td>1</td>
+			    <td>2</td>
+			    <td>3</td>
+			    <td>4</td>
+			    <td>5</td>
+			    <td>6</td>
+			    <td>7</td>
+			    <td>8</td>
+			    <td>9</td>
+			    <td>10</td>
+			    <td>Final Round</td>
+				</tr>
+			  </tbody>
+			</table>
+	      </div>
+	      <div class="modal-footer">
+	        <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+	      </div>
+	    </div>
+
+	  </div>
+	</div>
+	<script>
+		var simulatorMode = -1;;
+		$.material.init();
+
+
+		$(document).keyup( function(e){
+			// console.log(e.keyCode);
+			if(e.keyCode == 16){
+				// $("div.blurry").click();
+				$("#totalScores").modal("toggle");
+				// $(".blurry").toggleClass("active");
+			} 
+		});
+	</script>
+	<script type="text/javascript" src="js/slideChangerRequest.js"></script>
+	<script type="text/javascript" src="js/threeJsScript.js"></script>
+</body>
+</html>
