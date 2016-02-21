@@ -64,7 +64,7 @@ $(".patternGroup").click(function(){
 function sendMarks(){
 
 	// var url = "http://localhost:3000/request/scoreboard";
-	var url = "https://hackersclub.herokuapp.com/request/scoreboard";
+	var url = "/request/scoreboard";
 
 	$.ajax({
 	  method: "POST",
